@@ -179,7 +179,7 @@ Style guide to contributors:
           var curTuners = [];
 
           // Set the 'ontunerchanged' event handler.
-          navigator.mozTV.ontunerchanged = function ontunerchanged(event) {
+          navigator.tv.ontunerchanged = function ontunerchanged(event) {
             var operation = event.operation;
             var changedTuner = event.tuner;
 
@@ -202,7 +202,7 @@ Style guide to contributors:
           };
 
           // Retrieve all the currently available TV tuners.
-          navigator.mozTV.getTuners().then(function onsuccess(tuners) {
+          navigator.tv.getTuners().then(function onsuccess(tuners) {
             curTuners = tuners;
 
             tuners.forEach(function setEventHandler(tuner) {
@@ -230,7 +230,7 @@ Style guide to contributors:
           var curChannelsOfTuners = {};
 
           // Retrieve all the currently available TV tuners in the TV device.
-          navigator.mozTV.getTuners().then(function onsuccess(tuners) {
+          navigator.tv.getTuners().then(function onsuccess(tuners) {
             tuners.forEach(function getChannelsByTuner(tuner) {
               var tunerId = tuner.id;
               var currentSource = tuner.currentSource;
@@ -296,7 +296,7 @@ Style guide to contributors:
           var curProgramsOfChannels = {};
 
           // Retrieve all the currently available TV tuners in the TV device.
-          navigator.mozTV.getTuners().then(function onsuccess(tuners) {
+          navigator.tv.getTuners().then(function onsuccess(tuners) {
             if (tuners.length == 0) {
               return;
             }
@@ -360,7 +360,7 @@ Style guide to contributors:
             &lt;head&gt;
               &lt;script&gt;
                 // Retrieve all the currently available TV tuners first.
-                navigator.mozTV.getTuners().then(function onsuccess(tuners) {
+                navigator.tv.getTuners().then(function onsuccess(tuners) {
                   if (tuners.length == 0) {
                     return;
                   }
@@ -388,7 +388,7 @@ Style guide to contributors:
 
         <pre class="example highlight">
           // Retrieve all the currently available TV tuners in the TV device.
-          navigator.mozTV.getTuners().then(function onsuccess(tuners) {
+          navigator.tv.getTuners().then(function onsuccess(tuners) {
             if (tuners.length == 0) {
               return;
             }
@@ -452,7 +452,7 @@ Style guide to contributors:
 
         <pre class="example highlight">
           // Retrieve all the currently available TV tuners.
-          navigator.mozTV.getTuners().then(function onsuccess(tuners) {
+          navigator.tv.getTuners().then(function onsuccess(tuners) {
             if (tuners.length == 0) {
               return;
             }
@@ -497,7 +497,7 @@ Style guide to contributors:
 
         <pre class="example highlight">
           // Retrieve all the currently available TV tuners.
-          navigator.mozTV.getTuners().then(function onsuccess(tuners) {
+          navigator.tv.getTuners().then(function onsuccess(tuners) {
             if (tuners.length == 0) {
               return;
             }
@@ -514,7 +514,7 @@ Style guide to contributors:
             currentSource.oncurrentchannelchanged = function oncurrentchannelchanged(event) {
               var changedCurrentChannel = event.channel;
 
-              if (navigator.mozTV.isParentalControlLocked &&
+              if (navigator.tv.isParentalControlLocked &&
                   changedCurrentChannel.isProtected) {
                 // If the TV parental control is locked and the currently tuned
                 // TV channel is protected, the |tuner.stream|'s media tracks
@@ -523,7 +523,7 @@ Style guide to contributors:
                 alert("Parental control is locked. Please enter the password.");
 
                 // Unlock the TV parental control which will be applied system-wisely.
-                navigator.mozTV.unlockParentalControl().then(function onsuccess() {
+                navigator.tv.unlockParentalControl().then(function onsuccess() {
                   alert("Parental control is unlocked until the next reboot.");
                 }, function onerror(error) {
                   alert(error);
@@ -618,7 +618,7 @@ Style guide to contributors:
     <section>
       <h2><a>Navigator</a> Interface</h2>
         <dl title="partial interface Navigator" class="idl">
-          <dt>readonly attribute TVManager mozTV</dt>
+          <dt>readonly attribute TVManager tv</dt>
           <dd>
           MUST return the object that exposes the interface to the TV service.
           </dd>
