@@ -808,6 +808,11 @@ Style guide to contributors:
       </p>
       <dl title="interface TVTuner : EventTarget" class="idl">
 
+        <dt>sequence&lt;TVSourceType&gt; getSupportedSourceTypes ()</dt>
+          <dd>
+            MUST return the types of the supported TV sources.
+          </dd>
+
         <dt>Promise getSources ()</dt>
           <dd>
             This method makes a request to retrieve all the TV sources that are
@@ -835,11 +840,6 @@ Style guide to contributors:
         <dt>readonly attribute DOMString id</dt>
           <dd>
             MUST return the ID of the TV tuner.
-          </dd>
-
-        <dt>readonly attribute TVSourceType[] supportedSourceTypes</dt>
-          <dd>
-            MUST return the types of the supported TV sources.
           </dd>
 
         <dt>readonly attribute TVSource? currentSource</dt>
@@ -1559,6 +1559,18 @@ Style guide to contributors:
         a set of operations related to the TV program.
       </p>
       <dl title="interface TVProgram" class="idl">
+        <dt>sequence&lt;DOMString&gt; getAudioLanguages ()</dt>
+          <dd>
+            MUST return the audio languages of the TV program in 3-digit
+            language codes specified by ISO 639-2.
+          </dd>
+
+        <dt>sequence&lt;DOMString&gt; getSubtitleLanguages ()</dt>
+          <dd>
+            MUST return the subtitle languages of the TV program in 3-digit
+            language codes specified by ISO 639-2.
+          </dd>
+
         <dt>readonly attribute DOMString eventId</dt>
           <dd>
             MUST return the event ID of the TV program.
@@ -1587,11 +1599,6 @@ Style guide to contributors:
         <dt>readonly attribute DOMString? description</dt>
           <dd>
             MUST return the description of the TV program.
-          </dd>
-
-        <dt>readonly attribute DOMString? language</dt>
-          <dd>
-            MUST return the language of the TV program.
           </dd>
 
         <dt>readonly attribute DOMString? rating</dt>
