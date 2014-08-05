@@ -1589,7 +1589,8 @@ Style guide to contributors:
 
         <dt>readonly attribute DOMString eventId</dt>
           <dd>
-            MUST return the event ID of the TV program.
+            MUST return the event ID of the TV program. It has to be unique only
+            within a TV channel.
           </dd>
 
         <dt>readonly attribute TVChannel channel</dt>
@@ -1654,13 +1655,22 @@ Style guide to contributors:
         retrieving the TV programs.
       </p>
       <dl title="dictionary TVGetProgramsOptions" class="idl">
+        <dt>unsigned long offsetOfPrograms</dt>
+          <dd>
+            Specifies how many TV programs to be skipped from the time point
+            of now. E.g., if this option is passed as <code>1</code>, the
+            method will skip the current TV program and return the ones starting
+            with the next TV program.
+          </dd>
         <dt>unsigned long numberOfPrograms</dt>
           <dd>
             Specifies how many TV programs to be retrieved from the time point
             of now. E.g., if this option is passed as <code>1</code>, the
             method will return the TV program that is currently broadcasted by
             the TV channel at this moment; if it is passed as <code>2</code>,
-            the method will return the current and the next TV programs.
+            the method will return the current and the next TV programs. Passing
+            0 implies no effect. Besides, the number of returned TV programs
+            could be less than this value if there are not that many programs.
           </dd>
         <dt>unsigned long long startTime</dt>
           <dd>
