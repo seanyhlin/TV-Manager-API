@@ -1756,10 +1756,13 @@ Style guide to contributors:
         source.
       </p>
       <dl title="interface TVEITBroadcastedEvent : Event" class="idl">
-        <dt>readonly attribute TVProgram[] programs</dt>
+        <dt>readonly attribute object programs</dt>
           <dd>
             MUST return the available TV programs in the EIT that is broadcasted
-            by the TV source.
+            by the TV source. Please note that the cached value for this array
+            needs to go into an internal slot for the object, and it should be
+            cached there until the next time that the underlying array changes
+            when the cached value will be updated.
           </dd>
       </dl>
     </section>
