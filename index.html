@@ -1009,7 +1009,9 @@ Style guide to contributors:
             available in the TV source. It returns a new <code>Promise</code>
             that will be used to notify the caller about the result of the
             operation, which is an array of <a>TVChannel</a> elements that
-            belong to the TV source.
+            belong to the TV source. Note that the <code>Promise</code> may be
+            rejected with an <code>InvalidStateError</code> if this method gets
+            called during channel scanning.
           </dd>
 
         <dt>Promise setCurrentChannel ()</dt>
@@ -1017,7 +1019,9 @@ Style guide to contributors:
             This method makes a request to tune the currently streamed TV
             channel by the <code>channelNumber</code> parameter. It returns a
             new <code>Promise</code> that will be used to notify the caller
-            about the result of the operation.
+            about the result of the operation. Note that the <code>Promise</code>
+            may be rejected with an <code>InvalidStateError</code> if this
+            method gets called during channel scanning.
             <dl class='parameters'>
               <dt>DOMString channelNumber</dt>
                 <dd>
