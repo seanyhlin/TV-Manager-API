@@ -10,15 +10,15 @@
         specStatus:          "unofficial", // "ED",
         shortName:           "TV Manager API", // needed for generated URLs
         editors: [{
-          name: "Gary Chen(PoYu Chen)",
-          company: "Mozilla",
-          companyURL: "http://www.mozilla.org",
-          mailto: "gchen@mozilla.com"
-        }, {
           name: "Sean Lin",
           company: "Mozilla",
           companyURL: "http://www.mozilla.org",
           mailto: "selin@mozilla.com"
+        }, {
+          name: "Gary Chen (PoYu Chen)",
+          company: "Mozilla",
+          companyURL: "http://www.mozilla.org",
+          mailto: "gchen@mozilla.com"
         }, {
           name: "Gene Lian",
           company: "Mozilla",
@@ -1426,15 +1426,6 @@ Style guide to contributors:
           </dd>
 
         <dt class="no-docs">
-          attribute EventHandler oncurrentprogramchanged
-        </dt>
-          <dd>
-            Handles the <code>oncurrentprogramchanged</code> event of type
-            <a>TVCurrentProgramChangedEvent</a>, fired when the currently
-            broadcasted TV program is changed by the TV channel.
-          </dd>
-
-        <dt class="no-docs">
           attribute EventHandler onprotectionstatechanged
         </dt>
           <dd>
@@ -1541,16 +1532,6 @@ Style guide to contributors:
           </thead>
           <tbody>
             <tr>
-              <td><strong><code>oncurrentprogramchanged</code></strong></td>
-              <td><code><dfn id="dfn-change-event">currentprogramchanged</dfn></code></td>
-              <td><a><code>TVCurrentProgramChangedEvent</code></a></td>
-              <td>
-                Handles the information of the currently broadcasted TV program
-                that is changed by the TV channel.
-              </td>
-            </tr>
-
-            <tr>
               <td><strong><code>onprotectionstatechanged</code></strong></td>
               <td><code><dfn id="dfn-change-event">protectionstatechanged</dfn></code></td>
               <td><a><code>TVProtectionStateChangedEvent</code></a></td>
@@ -1621,12 +1602,6 @@ Style guide to contributors:
         <dt>readonly attribute DOMString? rating</dt>
           <dd>
             MUST return the rating of the TV program.
-          </dd>
-
-        <dt>readonly attribute boolean isInterrupting</dt>
-          <dd>
-            MUST indicate whether the TV program is a special one interrupting
-            another scheduled program.
           </dd>
       </dl>
     </section>
@@ -1804,24 +1779,6 @@ Style guide to contributors:
           <dd>
             MUST return the TV channel that is currently streamed by the TV
             tuner. MUST return <em>null</em> if the TV tuner is not streaming
-            any data.
-          </dd>
-      </dl>
-    </section>
-
-<!-- - - - - - - - Interface TVCurrentProgramChangedEvent - - - - - - - - - -->
-    <section>
-      <h2><a>TVCurrentProgramChangedEvent</a> Interface</h2>
-      <p>
-        The <a>TVCurrentProgramChangedEvent</a> interface represents the event
-        related to the currently broadcasted TV program that is changed by the
-        TV channel.
-      </p>
-      <dl title="interface TVCurrentProgramChangedEvent : Event" class="idl">
-        <dt>readonly attribute TVProgram? program</dt>
-          <dd>
-            MUST return the TV program that is currently broadcasted by the TV
-            channel. MUST return <em>null</em> if the TV tuner is not streaming
             any data.
           </dd>
       </dl>
