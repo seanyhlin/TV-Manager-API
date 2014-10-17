@@ -685,15 +685,6 @@ Style guide to contributors:
             TV parental control.
           </dd>
 
-        <dt class="no-docs">
-          attribute EventHandler ontunerchanged
-        </dt>
-          <dd>
-            Handles the <code>ontunerchanged</code> event of type
-            <a>TVTunerChangedEvent</a>, fired when the TV device detects a TV
-            tuner is added/removed.
-          </dd>
-
       </dl>
 
       <section>
@@ -790,16 +781,6 @@ Style guide to contributors:
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td><strong><code>ontunerchanged</code></strong></td>
-              <td><code><dfn id="dfn-change-event">tunerchanged</dfn></code></td>
-              <td><a><code>TVTunerChangedEvent</code></a></td>
-              <td>
-                Handles the information of the TV tuner that is added/removed
-                by the TV device.
-              </td>
-            </tr>
-
             <tr>
               <td><strong><code>onparentalcontrolchanged</code></strong></td>
               <td><code><dfn id="dfn-change-event">parentalcontrolchanged</dfn></code></td>
@@ -1679,26 +1660,6 @@ Style guide to contributors:
       </dl>
     </section>
 
-<!-- - - - - - - - - - Interface TVTunerChangedEvent - - - - - - - - - - -->
-    <section>
-      <h2><a>TVTunerChangedEvent</a> Interface</h2>
-      <p>
-        The <a>TVTunerChangedEvent</a> interface represents the event related
-        to the TV tuner that is added/removed by the TV device.
-      </p>
-      <dl title="interface TVTunerChangedEvent : Event" class="idl">
-        <dt>readonly attribute TVTunerChangedEventOperation operation</dt>
-          <dd>
-            MUST return the type of operation that changes the TV tuner.
-          </dd>
-
-        <dt>readonly attribute TVTuner tuner</dt>
-          <dd>
-            MUST return the TV tuner that is added/removed by the TV device.
-          </dd>
-      </dl>
-    </section>
-
 <!-- - - - - - - - Interface TVCurrentSourceChangedEvent - - - - - - - - - -->
     <section>
       <h2><a>TVCurrentSourceChangedEvent</a> Interface</h2>
@@ -1918,22 +1879,6 @@ Style guide to contributors:
         <dt>data</dt>
           <dd>
             The TV channel is broadcasted as a data type.
-          </dd>
-      </dl>
-
-      <p>
-        The attribute <code>operation</code> in the <a>TVTunerChangedEvent</a>
-        can have the following values:
-      </p>
-      <dl title="enum TVTunerChangedEventOperation" class="idl">
-        <dt>added</dt>
-          <dd>
-            A TV tuner is added.
-          </dd>
-
-        <dt>removed</dt>
-          <dd>
-            A TV tuner is removed.
           </dd>
       </dl>
 
