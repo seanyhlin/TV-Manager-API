@@ -283,14 +283,6 @@ Style guide to contributors:
               // currently configured TV source of the TV tuner.
               currentSource.getChannels().then(function onsuccess(channels) {
                 curChannelsOfTuners[tunerId] = channels;
-
-                channels.forEach(function setEventHandler(channel) {
-                  // Set the 'onprotectionstatechanged' event handler.
-                  channel.onprotectionstatechanged = function onprotectionstatechanged(event) {
-                    alert("The current protection state of TV channel: " + channel.name +
-                          " is configured to: " + event.isProtected);
-                  };
-                });
               }, function onerror(error) {
                 alert(error);
               });
@@ -507,71 +499,6 @@ Style guide to contributors:
           });
         </pre>
 
-        <p>
-          The following example shows how to unlock the TV parental control.
-        </p>
-
-        <pre class="example highlight">
-          // Retrieve all the currently available TV tuners.
-          navigator.tv.getTuners().then(function onsuccess(tuners) {
-            if (tuners.length == 0) {
-              return;
-            }
-
-            // Just use the first TV tuner.
-            var tuner = tuners[0];
-            var currentSource = tuner.currentSource;
-
-            if (!currentSource) {
-              return;
-            }
-
-            // This event handler will be triggered when the TV channel is tuned.
-            currentSource.oncurrentchannelchanged = function oncurrentchannelchanged(event) {
-              var changedCurrentChannel = event.channel;
-
-              if (navigator.tv.isParentalControlLocked &&
-                  changedCurrentChannel.isProtected) {
-                // If the TV parental control is locked and the currently tuned
-                // TV channel is protected, the |tuner.stream|'s media tracks
-                // will be disabled (i.e. black screen). The UA can then pop up
-                // a prompt to ask the user to enter the password to unlock it.
-                alert("Parental control is locked. Please enter the password.");
-
-                // Unlock the TV parental control which will be applied system-wisely.
-                navigator.tv.unlockParentalControl().then(function onsuccess() {
-                  alert("Parental control is unlocked until the next reboot.");
-                }, function onerror(error) {
-                  alert(error);
-                });
-              }
-            };
-
-            // Retrieve all the currently available TV channels in the currently
-            // configured TV source of the TV tuner.
-            currentSource.getChannels().then(function onsuccess(channels) {
-              if (channels.length == 0) {
-                return;
-              }
-
-              // Just use the first TV channel.
-              var channel = channels[0];
-              var channelNumber = channel.number;
-
-              // Tune the currently streamed TV channel based on the TV channel
-              // number.
-              currentSource.setCurrentChannel(channelNumber).then(function onsuccess() {
-                alert("Succeeded to tune the currently streamed TV channel.");
-              }, function onerror(error) {
-                alert(error);
-              });
-            }, function onerror(error) {
-              alert(error);
-            });
-          }, function onerror(error) {
-            alert(error);
-          });
-        </pre>
       </section>
     </section>
     
@@ -657,34 +584,6 @@ Style guide to contributors:
             that will be used to notify the caller about the result of the
             operation, which is an array of <a>TVTuner</a> elements.
           </dd>
-
-        <dt>Promise unlockParentalControl ()</dt>
-          <dd>
-            This method makes a request to unlock the TV parental control by
-            popping up a prompt to ask the user to input the correct password.
-            Once the TV parental control is unlocked, it won't be locked until
-            the next reboot. It returns a new <code>Promise</code> that will be
-            used to notify the caller about the result of the operation.
-          </dd>
-
-        <dt>readonly attribute boolean isParentalControlLocked</dt>
-          <dd>
-            MUST return the current lock state of the TV parental control, which
-            is system-widely applied to the TV device (i.e., once the parental
-            control is unlocked, all the protected TV channels/programs will be
-            unlocked until the next reboot).
-          </dd>
-
-        <dt class="no-docs">
-          attribute EventHandler onparentalcontrolchanged
-        </dt>
-          <dd>
-            Handles the <code>onparentalcontrolchanged</code> event of type
-            <a>TVParentalControlChangedEvent</a>, fired when the method
-            <a><code>unlockParentalControl</code></a> is invoked to unlock the
-            TV parental control.
-          </dd>
-
       </dl>
 
       <section>
@@ -727,71 +626,6 @@ Style guide to contributors:
           </ol>
         </ol>
 
-        <p>
-          The <dfn><code>unlockParentalControl</code></dfn> method when invoked
-          MUST run the following steps:
-        </p>
-        <ol>
-          <li>
-            Let <var>promise</var> be a new <code>Promise</code> object and
-            <var>resolver</var> be its associated <code>resolver</code>.
-          </li>
-          <li>
-            Return <var>promise</var> to the caller.
-          </li>
-          <li>
-            Make a request to the TV device to unlock the TV parental control.
-            The <a class="internalDFN" href="#dfn-user-agent">user agent</a> has
-            to pop up a prompt to ask the user to input the password to unlock
-            the TV parental control.
-          </li>
-          <li>
-            If an <var>error</var> occurs invoke <em>resolver</em>'s <a
-            class="internalDFN" href="#dfn-reject-algorithm">reject algorithm</a>
-            with <em>error</em> as the <code>value</code> argument.
-          </li>
-          <li>
-            When the request has been successfully completed:
-          </li>
-          <ol>
-            <li>
-              Invoke <em>resolver</em>'s <a
-              class="internalDFN" href="#dfn-fulfill-algorithm"> fulfill algorithm</a>
-              without assigning a value to the <code>value</code> argument.
-            </li>
-          </ol>
-        </ol>
-
-      </section>
-
-      <section>
-        <h2>Event handlers</h2>
-        <p>The following are the <a class="internalDFN"
-        href="#dfn-eventhandler">event handlers</a> (and their corresponding <a
-        class="internalDFN" href="#dfn-eventtypes">event types</a>) that MUST be
-        supported as attributes by the <a>TVManager</a> object.
-
-        <table class="simple">
-          <thead>
-            <tr>
-              <th>Event handler</th>
-              <th>Event name</th>
-              <th>Event type</th>
-              <th>Short description</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong><code>onparentalcontrolchanged</code></strong></td>
-              <td><code><dfn id="dfn-change-event">parentalcontrolchanged</dfn></code></td>
-              <td><a><code>TVParentalControlChangedEvent</code></a></td>
-              <td>
-                Handles the information of the changed state of the TV parental
-                control.
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </section>
 
     </section>
@@ -1324,19 +1158,13 @@ Style guide to contributors:
             </dl>
           </dd>
 
-        <dt>Promise setProtectionState ()</dt>
+        <dt>Promise getCurrentProgram ()</dt>
           <dd>
-            This method makes a request to configure the current protection
-            state of the TV channel by the <code>isProtected</code> parameter.
-            It returns a new <code>Promise</code> that will be used to notify
-            the caller about the result of the operation.
-            <dl class='parameters'>
-              <dt>boolean isProtected</dt>
-                <dd>
-                  Specifies the new protection state for configuring the current
-                  protection state of the TV channel.
-                </dd>
-            </dl>
+            This method makes a request to retrieve the current TV program
+            available in the TV channel. It returns a new <code>Promise</code>
+            that will be used to notify the caller about the result of the
+            operation, which is a <a>TVProgram</a> element that belongs to the
+            TV channel.
           </dd>
 
         <dt>readonly attribute DOMString networkId</dt>
@@ -1386,13 +1214,6 @@ Style guide to contributors:
             <code>"12-2"</code>... etc.
           </dd>
 
-        <dt>readonly attribute boolean isProtected</dt>
-          <dd>
-            MUST return the current protection state of the TV channel, which
-            decides whether or not the TV channel is protected from being
-            watched by the children.
-          </dd>
-
         <dt>readonly attribute boolean isEmergency</dt>
           <dd>
             MUST indicate whether the TV channel is for the emergency purpose.
@@ -1401,23 +1222,6 @@ Style guide to contributors:
         <dt>readonly attribute boolean isFree</dt>
           <dd>
             MUST indicate whether the TV channel is free to watch.
-          </dd>
-
-        <dt>readonly attribute TVProgram? currentProgram</dt>
-          <dd>
-            MUST return the TV program that is currently broadcasted by the TV
-            channel. MUST return <em>null</em> if the TV tuner is not streaming
-            any data.
-          </dd>
-
-        <dt class="no-docs">
-          attribute EventHandler onprotectionstatechanged
-        </dt>
-          <dd>
-            Handles the <code>onprotectionstatechanged</code> event of type
-            <a>TVProtectionStateChangedEvent</a>, fired when the method
-            <a><code>setProtectionState</code></a> is invoked to configure the
-            current protection state of the TV channel.
           </dd>
 
       </dl>
@@ -1464,7 +1268,7 @@ Style guide to contributors:
         </ol>
 
         <p>
-          The <dfn><code>setProtectionState</code></dfn> method when invoked
+          The <dfn><code>getCurrentProgram</code></dfn> method when invoked
           MUST run the following steps:
         </p>
         <ol>
@@ -1476,9 +1280,8 @@ Style guide to contributors:
             Return <var>promise</var> to the caller.
           </li>
           <li>
-            Make a request to the TV channel to configure the current protection
-            state of the TV channel according to the <code>isProtected</code>
-            parameter.
+            Make a request to the TV channel to retrieve all the current TV
+            program available in the TV channel.
           </li>
           <li>
             If an <var>error</var> occurs invoke <em>resolver</em>'s <a
@@ -1490,45 +1293,16 @@ Style guide to contributors:
           </li>
           <ol>
             <li>
+              Let <var>program</var> be the retrieved <a>TVProgram</a> element.
+            </li>
+            <li>
               Invoke <em>resolver</em>'s <a
               class="internalDFN" href="#dfn-fulfill-algorithm"> fulfill algorithm</a>
-              without assigning a value to the <code>value</code> argument.
+              with <em>program</em> as the <code>value</code> argument.
             </li>
           </ol>
         </ol>
 
-      </section>
-
-      <section>
-        <h2>Event handlers</h2>
-        <p>The following are the <a class="internalDFN"
-        href="#dfn-eventhandler">event handlers</a> (and their corresponding <a
-        class="internalDFN" href="#dfn-eventtypes">event types</a>) that MUST be
-        supported as attributes by the <a>TVChannel</a> object.
-
-        <table class="simple">
-          <thead>
-            <tr>
-              <th>Event handler</th>
-              <th>Event name</th>
-              <th>Event type</th>
-              <th>Short description</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong><code>onprotectionstatechanged</code></strong></td>
-              <td><code><dfn id="dfn-change-event">protectionstatechanged</dfn></code></td>
-              <td><a><code>TVProtectionStateChangedEvent</code></a></td>
-              <td>
-                Handles the information of the current protection state of the
-                TV channel that is configured by the method
-                <a><code>setProtectionState</code></a>.
-              </td>
-            </tr>
-
-          </tbody>
-        </table>
       </section>
 
     </section>
@@ -1645,21 +1419,6 @@ Style guide to contributors:
       </dl>
     </section>
 
-<!-- - - - - - - - - - - - Interface TVParentalControlChangedEvent - - -->
-    <section>
-      <h2><a>TVParentalControlChangedEvent</a> Interface</h2>
-      <p>
-        The <a>TVParentalControlChangedEvent</a> interface represents the
-        event related to the state change of the TV parental control.
-      </p>
-      <dl title="interface TVParentalControlChangedEvent : Event" class="idl">
-        <dt>readonly attribute boolean isParentalControlLocked</dt>
-          <dd>
-            MUST return the changed lock state of the TV parental control.
-          </dd>
-      </dl>
-    </section>
-
 <!-- - - - - - - - Interface TVCurrentSourceChangedEvent - - - - - - - - - -->
     <section>
       <h2><a>TVCurrentSourceChangedEvent</a> Interface</h2>
@@ -1735,23 +1494,6 @@ Style guide to contributors:
             MUST return the TV channel that is currently streamed by the TV
             tuner. MUST return <em>null</em> if the TV tuner is not streaming
             any data.
-          </dd>
-      </dl>
-    </section>
-
-<!-- - - - - - - - Interface TVProtectionStateChangedEvent - - - - - - - - - -->
-    <section>
-      <h2><a>TVProtectionStateChangedEvent</a> Interface</h2>
-      <p>
-        The <a>TVProtectionStateChangedEvent</a> interface represents the event
-        related to the current protection state of the TV channel that is
-        configured by the method <a><code>setProtectionState</code></a>.
-      </p>
-      <dl title="interface TVProtectionStateChangedEvent : Event" class="idl">
-        <dt>readonly attribute boolean isProtected</dt>
-          <dd>
-            MUST return the current protection state that is configured by the
-            TV channel.
           </dd>
       </dl>
     </section>
