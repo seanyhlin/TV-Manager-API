@@ -86,81 +86,60 @@ Style guide to contributors:
     <section class="informative">
       <h2>Introduction</h2>
       <p>
-        The TV Manager API interfaces provide a bunch of properties and a set of
-        operations to allow Web applications to acquire the information of TV
-        sources, TV channels and TV programs as well as to manage the native TV
-        hardwares (i.e., TV tuners) or the TV Web services.
+        TV Manager API enables the development of web-based applications to
+        acquire the information from service providers as well as to manage the
+        native TV hardwares (i.e. tuners).
       </p>
 
       <section>
-        <h3>User Cases</h3>
+        <h3>Use Cases</h3>
         <p>
-          The TV Manager API is aimed to cover the following user cases:
+          The TV Manager API is aimed to cover the following use cases:
         </p>
         <ul>
           <li>
-            The web content is able to control the TV channel of the TV device
-            with the TV tuner.
+            The web content is able to know the number of tuners on the device,
+            and the broadcasting types (DVB-T, DVB-S, etc.) supported by each of
+            them.
           </li>
           <li>
-            One TV can have multiple TV tuners. For example, one is for watching
-            TV and the other is for recording.
+            The TV tuner, which may have its own scanning algorithm provided by
+            the vendor, can scan broadcasting channels. The scanning status and
+            the information of discovered channels are exposed to the web
+            content.
           </li>
           <li>
-            TV Tuner can scan broadcasting channels, where each TV tuner can
-            have its own scanning algorithm provided by the vendor.
+            The web content is able to control/select TV channels with the tuner
+            on the device.
           </li>
           <li>
-            Web content needs to know which broadcasting types are supported by
-            the TV tuners.
+            The web content is able to receive the information of Electronic
+            Program Guide (EPG) as well as the dynamic updates provided by
+            broadcasters/service providers.
           </li>
           <li>
-            Web content needs to know the information of Electronic Program
-            Guide (EPG) that is being broadcasted.
+            A TV program may have multiple video/audio tracks in the same
+            broadcasting stream.
           </li>
           <li>
-            Users can navigate through the EPG and selects a program to watch.
+            The web content may flexibly manipulate multiple tuners. For
+            example, it may only consume one tuner for watching and recording a
+            given channel at the same time. Yet when it comes to switch to
+            another channel to watch, in order not to affect the original
+            recording task against the tuner, the app may take another tuner to
+            do so, if resource permitted.
           </li>
           <li>
-            Users can watch the broadcasting program while browsing through the
-            list of other programs that are currently broadcasted.
+            The web content may play the broadcasting stream content while
+            browsing through the list of other currently broadcasted programs.
           </li>
           <li>
-            Web content needs to know if the currently displayed TV channel has
-            bad or no signal. Can be covered by VideoElement?
+            The web content is able to suffice the scenarios of concurrently
+            displaying multiple streams (i.e. Picture-in-Picture).
           </li>
           <li>
-            One TV channel can have multiple video/audio tracks in the
-            same broadcasting stream.
-          </li>
-          <li>
-            Emergency broadcasting for earthquake, tsunami... etc.
-          </li>
-          <li>
-            In the first step, only certified apps are allowed to use the TV
-            Manager API.
-          </li>
-          <li>
-            The DTV can keep track of the multiple TV tuners that a TV channel
-            can belong to, so that web content can do more flexible services
-            like: when the user is using the TV tuner A to watch and record a
-            certain TV channel at the same time, supposing the user wants to
-            switch to other channels to watch, the DTV should use the TV tuner
-            B to switch channels so that it won't stop the original recording
-            task on the TV tuner A.
-          </li>
-          <li>
-            EPG can be dynamically updated by the broadcasters. We need a way
-            to notify the web contents to update its EPG menu from time to time.
-          </li>
-          <li>
-            It is necessary to support multiple channels that can be
-            concurrently displayed on the TV (i.e. Picture-in-Picture).
-          </li>
-          <li>
-            DTV needs to connect to the broadcasters' remote servers to provide
-            more TV services through the Web. To do this, the web content needs
-            a universal way to identify the TV program.
+            The web content can receive emergency announcements for earthquake,
+            tsunami, fire, etc.
           </li>
         </ul>
       </section>
@@ -686,7 +665,7 @@ Style guide to contributors:
             played by the <a href="http://dev.w3.org/html5/spec-preview/the-video-element.html#the-video-element">video</a>
             element by assigning the <code>MediaStream</code> to the
             <code>HTMLMediaElement</code> (<a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html#mediastreams-as-media-elements">details</a>) and can be recorded by the
-            <a href="https://dvcs.w3.org/hg/dap/raw-file/tip/media-stream-capture/MediaRecorder.html#MediaRecorderAPI">MediaRecorder</a>. MUST
+            <a href="http://www.w3.org/TR/mediastream-recording/#idl-def-MediaRecorder">MediaRecorder</a>. MUST
             return <em>null</em> if the TV tuner is not streaming any data,
             which happens when the streaming signal is broken or due to
             any other reasons that the TV tuner fails to stream the data.
