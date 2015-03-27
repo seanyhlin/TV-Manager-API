@@ -164,48 +164,30 @@ Style guide to contributors:
         </p>
 
         <p>
-          The following example shows how to get all the TV tuners that are
-          currently available on the TV device and how to listen to the events
-          for the TV tuner changes.
+          The following example shows how to get all the available TV tuners on
+          the TV device, and how to set the current source and listen to events
+          for source changes.
         </p>
 
         <pre class="example highlight">
-          // An array which saves all the currently available TV tuners.
-          var curTuners = [];
-
-          // Set the 'ontunerchanged' event handler.
-          navigator.tv.ontunerchanged = function ontunerchanged(event) {
-            var operation = event.operation;
-            var changedTuner = event.tuner;
-
-            switch (operation) {
-              case "added":
-                curTuners.push(changedTuner);
-                break;
-              case "removed":
-                curTuners.some(function findTuner(tuner, index) {
-                  if (tuner.id == changedTuner.id) {
-                    curTuners.splice(index, 1);
-                    return true;
-                  }
-                  return false;
-                });
-                break;
-              default:
-                break;
-            }
-          };
-
-          // Retrieve all the currently available TV tuners.
+          // Retrieve all the available TV tuners.
           navigator.tv.getTuners().then(function onsuccess(tuners) {
-            curTuners = tuners;
+            // Just use the first TV tuner.
+            var tuner = tuners[0];
 
-            tuners.forEach(function setEventHandler(tuner) {
-              // Set the 'oncurrentsourcechanged' event handler.
-              tuner.oncurrentsourcechanged = function oncurrentsourcechanged(event) {
-                alert("The current TV source of TV tuner: " + tuner.id +
-                      " is configured to: " + event.source.type);
-              };
+            // Set the 'oncurrentsourcechanged' event handler.
+            tuner.oncurrentsourcechanged = function oncurrentsourcechanged(event) {
+              alert("The current TV source has changed.");
+            };
+
+            // Get the supported TV source types for the TV tuner. 
+            var sourceTypes = tuner.getSupportedSourceTypes();
+
+            // Just use the first TV source type.
+            tuner.setCurrentSource(sourceTypes[0]).then(function onsuccess() {
+              alert("Succeeded to set the TV source.");
+            }, function onerror(error) {
+              alert(error);
             });
           }, function onerror(error) {
             alert(error);
@@ -213,55 +195,86 @@ Style guide to contributors:
         </pre>
 
         <p>
-          The following example shows how to get all the TV channels that are
-          currently available in the currently configured TV source of a TV
-          tuner and how to listen to the events for the TV channel changes.
+          The following example shows how to scan and get all the available TV
+          channels from a configured TV source of the TV tuner.
         </p>
 
         <pre class="example highlight">
-          // A matrix which maps the TV tuner to its corresponding array of TV
-          // channels based on the currently configured TV source.
-          // E.g., { "tunerId1": [...], "tunerId2": [...] }.
-          var curChannelsOfTuners = {};
+          // Assuming a tuner has already been picked and its current source is
+          // set, variable |currentSource| is used for following illustration.
 
-          // Retrieve all the currently available TV tuners in the TV device.
-          navigator.tv.getTuners().then(function onsuccess(tuners) {
-            tuners.forEach(function getChannelsByTuner(tuner) {
-              var tunerId = tuner.id;
-              var currentSource = tuner.currentSource;
+          if (currentSource.isScanning) {
+            return;
+          }
 
-              if (!currentSource) {
-                return;
-              }
+          // Set the 'onscanningstatechanged' event handler.
+          currentSource.onscanningstatechanged = function onscanningstatechanged(event) {
+            var state = event.state;
 
-              // Set the 'onscanningstatechanged' event handler.
-              currentSource.onscanningstatechanged = function onscanningstatechanged(event) {
-                var state = event.state;
-                var scannedChannel = event.channel;
+            switch (state) {
+              case "cleared":
+                alert("All the TV channels are cleared for rescanning.");
+                break;
+              case "scanned":
+                alert("A new TV channel is scanned: " + event.channel.name);
+                break;
+              case "completed":
+                alert("The scanning process is completed.");
 
-                switch (state) {
-                  case "cleared":
-                    if (curChannelsOfTuners[tunerId]) {
-                      delete curChannelsOfTuners[tunerId];
-                    }
-                    break;
-                  case "scanned":
-                    var channels = curChannelsOfTuners[tunerId];
-                    if (channels) {
-                      channels.push(scannedChannel);
-                    } else {
-                      curChannelsOfTuners[tunerId] = [scannedChannel];
-                    }
-                    break;
-                  default:
-                    break;
-                }
-              };
+                // Retrieve all the available TV channels from the configured
+                // TV source of the TV tuner.
+                currentSource.getChannels().then(function onsuccess(channels) {
+                  alert("Succeeded to scan and get all the TV channels.");
+                }, function onerror(error) {
+                  alert(error);
+                });
 
-              // Retrieve all the currently available TV channels in the
-              // currently configured TV source of the TV tuner.
-              currentSource.getChannels().then(function onsuccess(channels) {
-                curChannelsOfTuners[tunerId] = channels;
+                break;
+              case "stopped":
+                alert("The scanning process is stopped.");
+                break;
+              default:
+                break;
+            }
+          };
+
+          // Ask the configured TV source to scan TV channels.
+          currentSource.startScanning({
+            isRescanned: true
+          }).then(function onsuccess() {
+            alert("The scanning process starts.");
+          }, function onerror(error) {
+            alert(error);
+          });
+        </pre>
+
+        <p>
+          The following example shows how to get all the available TV programs
+          from the TV channel.
+        </p>
+
+        <pre class="example highlight">
+          // Assuming a tuner has already been picked and its current source is
+          // set, variable |currentSource| is used for following illustration.
+
+          // Set the 'oneitbroadcasted' event handler.
+          currentSource.oneitbroadcasted = function oneitbroadcasted(event) {
+            var newPrograms = event.programs;
+
+            // Add or update correspondent programs in |curProgramsOfChannels|
+            // based on their |eventId|.
+            ...
+          };
+
+          // Retrieve all the available TV channels from the configured TV
+          // source of the TV tuner.
+          currentSource.getChannels().then(function onsuccess(channels) {
+            channels.forEach(function getProgramsByChannel(channel) {
+              var channelNumber = channel.number;
+
+              // Retrieve all the available TV programs from the TV channel.
+              channel.getPrograms().then(function onsuccess(programs) {
+                curProgramsOfChannels[channelNumber] = programs;
               }, function onerror(error) {
                 alert(error);
               });
@@ -272,73 +285,9 @@ Style guide to contributors:
         </pre>
 
         <p>
-          The following example shows how to get all the TV programs that are
-          currently available in the TV channel and how to listen to the events
-          for the TV program changes.
-        </p>
-
-        <pre class="example highlight">
-          // A matrix which maps the TV channel to its corresponding array of TV
-          // programs. E.g., { "channelNumber1": [...], "channelNumber2": [...] }.
-          var curProgramsOfChannels = {};
-
-          // Retrieve all the currently available TV tuners in the TV device.
-          navigator.tv.getTuners().then(function onsuccess(tuners) {
-            if (tuners.length == 0) {
-              return;
-            }
-
-            // Just use the first TV tuner.
-            var tuner = tuners[0];
-            var currentSource = tuner.currentSource;
-
-            if (!currentSource) {
-              return;
-            }
-
-            // Set the 'oneitbroadcasted' event handler.
-            currentSource.oneitbroadcasted = function oneitbroadcasted(event) {
-              var newPrograms = event.programs;
-
-              // Flush the EPG because a new EIT is broadcasted by the TV source.
-              curProgramsOfChannels = {};
-
-              newPrograms.forEach(function addProgram(program) {
-                var channelNumber = program.channel.number;
-
-                var programs = curProgramsOfChannels[channelNumber];
-                if (programs) {
-                  programs.push(program);
-                } else {
-                  curProgramsOfChannels[channelNumber] = [program];
-                }
-              });
-            };
-
-            // Retrieve all the currently available TV channels in the currently
-            // configured TV source of the TV tuner.
-            currentSource.getChannels().then(function onsuccess(channels) {
-              channels.forEach(function getProgramsByChannel(channel) {
-                var channelNumber = channel.number;
-
-                // Retrieve all the currently available TV programs in the TV
-                // channel.
-                channel.getPrograms().then(function onsuccess(programs) {
-                  curProgramsOfChannels[channelNumber] = programs;
-                }, function onerror(error) {
-                  alert(error);
-                });
-              });
-            }, function onerror(error) {
-              alert(error);
-            });
-          });
-        </pre>
-
-        <p>
-          The following example shows how to play the <code>MediaStream</code>
-          of a TV source by assigning the <code>MediaStream</code> to a
-          <code>HTMLMediaElement</code>.
+          The following example shows how to play the streaming data of a TV
+          tuner by assigning the <code><a>MediaStream</a></code> to a
+          <code><a>HTMLMediaElement</a></code>.
         </p>
 
         <pre class="example highlight">
@@ -369,107 +318,32 @@ Style guide to contributors:
         </pre>
 
         <p>
-          The following example shows how to scan and get all the TV channels
-          that are available in the currently configured TV source of the TV tuner.
+          The following example shows how to switch the TV channel with the
+          channel number, and listen to events for channel changes.
         </p>
 
         <pre class="example highlight">
-          // Retrieve all the currently available TV tuners in the TV device.
-          navigator.tv.getTuners().then(function onsuccess(tuners) {
-            if (tuners.length == 0) {
+          // Assuming a tuner has already been picked and its current source is
+          // set, variable |currentSource| is used for following illustration.
+
+          // Retrieve all the available TV channels from the configured TV
+          // source of the TV tuner.
+          currentSource.getChannels().then(function onsuccess(channels) {
+            if (channels.length == 0) {
               return;
             }
 
-            // Just use the first TV tuner.
-            var tuner = tuners[0];
-            var currentSource = tuner.currentSource;
+            // Just use the first TV channel.
+            var channel = channels[0];
+            var channelNumber = channel.number.
 
-            if (!currentSource) {
-              return;
-            }
-
-            // Set the 'onscanningstatechanged' event handler.
-            currentSource.onscanningstatechanged = function onscanningstatechanged(event) {
-              var state = event.state;
-              var scannedChannel = event.channel;
-
-              switch (state) {
-                case "cleared":
-                  alert("All the TV channels are cleared for rescanning.");
-                  break;
-                case "scanned":
-                  alert("A new TV channel is scanned: " + scannedChannel.name);
-                  break;
-                case "completed":
-                  alert("The scanning process is completed.");
-                  break;
-                case "stopped":
-                  alert("The scanning process is stopped.");
-                  break;
-                default:
-                  break;
-              }
+            currentSource.oncurrentchannelchanged = function oncurrentchannelchanged(event) {
+              alert("The current channel has changed.");
             };
 
-            if (currentSource.isScanning) {
-              return;
-            }
-
-            // Ask the currently configured TV source to scan the TV channels.
-            currentSource.startScanning({
-              isRescanned: true
-            }).then(function onsuccess() {
-              // Retrieve all the currently available TV channels in the
-              // currently configured TV source of the TV tuner.
-              currentSource.getChannels().then(function onsuccess(channels) {
-                alert("Succeeded to scan and get all the TV channels.");
-              }, function onerror(error) {
-                alert(error);
-              });
-            }, function onerror(error) {
-              alert(error);
-            });
-          });
-        </pre>
-
-        <p>
-          The following example shows how to tune the TV channel by the TV
-          channel number.
-        </p>
-
-        <pre class="example highlight">
-          // Retrieve all the currently available TV tuners.
-          navigator.tv.getTuners().then(function onsuccess(tuners) {
-            if (tuners.length == 0) {
-              return;
-            }
-
-            // Just use the first TV tuner.
-            var tuner = tuners[0];
-            var currentSource = tuner.currentSource;
-
-            if (!currentSource) {
-              return;
-            }
-
-            // Retrieve all the currently available TV channels in the currently
-            // configured TV source of the TV tuner.
-            currentSource.getChannels().then(function onsuccess(channels) {
-              if (channels.length == 0) {
-                return;
-              }
-
-              // Just use the first TV channel.
-              var channel = channels[0];
-              var channelNumber = channel.number.
-
-              // Tune the currently streamed TV channel based on the TV channel
-              // number.
-              currentSource.setCurrentChannel(channelNumber).then(function onsuccess() {
-                alert("Succeeded to tune the currently streamed TV channel.");
-              }, function onerror(error) {
-                alert(error);
-              });
+            // Switch the TV channel based on the TV channel number.
+            currentSource.setCurrentChannel(channelNumber).then(function onsuccess() {
+              alert("Succeeded to switch the TV channel.");
             }, function onerror(error) {
               alert(error);
             });
@@ -547,7 +421,8 @@ Style guide to contributors:
 
       <p>
         The <dfn><a href="http://www.w3.org/TR/html5/embedded-content-0.html#the-video-element">video</a></dfn>
-        element is defined in [[!HTML5]].
+        and <dfn><a href="http://www.w3.org/TR/html5/embedded-content-0.html#htmlmediaelement">HTMLMediaElement</a></dfn>
+        elements are defined in [[!HTML5]].
       </p>
     </section>
 
@@ -574,7 +449,7 @@ Style guide to contributors:
         <dt>Promise getTuners ()</dt>
           <dd>
             This method makes a request to retrieve all the TV tuners that are
-            available in the TV device. It returns a new <code>Promise</code>
+            available in the TV device. It returns a new <code><a>Promise</a></code>
             that will be used to notify the caller about the result of the
             operation, which is an array of <a>TVTuner</a> elements.
           </dd>
@@ -589,7 +464,7 @@ Style guide to contributors:
         </p>
         <ol>
           <li>
-            Let <var>promise</var> be a new <code>Promise</code> object and
+            Let <var>promise</var> be a new <code><a>Promise</a></code> object and
             <var>resolver</var> be its associated <code>resolver</code>.
           </li>
           <li>
@@ -641,7 +516,7 @@ Style guide to contributors:
         <dt>Promise getSources ()</dt>
           <dd>
             This method makes a request to retrieve all the TV sources that are
-            available in the TV tuner. It returns a new <code>Promise</code>
+            available in the TV tuner. It returns a new <code><a>Promise</a></code>
             that will be used to notify the caller about the result of the
             operation, which is an array of <a>TVSource</a> elements that belong
             to the TV tuner.
@@ -651,7 +526,7 @@ Style guide to contributors:
           <dd>
             This method makes a request to configure the current TV source of
             the TV tuner by the <code>sourceType</code> parameter. It returns a
-            new <code>Promise</code> that will be used to notify the caller
+            new <code><a>Promise</a></code> that will be used to notify the caller
             about the result of the operation.
             <dl class='parameters'>
               <dt>TVSourceType sourceType</dt>
@@ -675,15 +550,16 @@ Style guide to contributors:
 
         <dt>readonly attribute MediaStream? stream</dt>
           <dd>
-            MUST return a <a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html#mediastream">MediaStream</a>
-            object that is currently streamed by the TV tuner, which can be
-            played by the <a href="http://dev.w3.org/html5/spec-preview/the-video-element.html#the-video-element">video</a>
-            element by assigning the <code>MediaStream</code> to the
-            <code>HTMLMediaElement</code> (<a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html#mediastreams-as-media-elements">details</a>) and can be recorded by the
-            <a href="http://www.w3.org/TR/mediastream-recording/#idl-def-MediaRecorder">MediaRecorder</a>. MUST
-            return <em>null</em> if the TV tuner is not streaming any data,
-            which happens when the streaming signal is broken or due to
-            any other reasons that the TV tuner fails to stream the data.
+            MUST return a <code><a>MediaStream</a></code> object that is
+            currently streamed by the TV tuner, which can be played by the
+            <code><a>video</a></code> element by
+            <a href="http://www.w3.org/TR/mediacapture-streams/#direct-assignment-to-media-elements">assigning</a>
+            the <code><a>MediaStream</a></code> to the
+            <code><a>HTMLMediaElement</a></code> and can be recorded by the
+            <code><a>MediaRecorder</a></code>.
+            MUST return <em>null</em> if the TV tuner is not streaming any data,
+            which happens when the streaming signal is broken or due to any
+            other reasons that the TV tuner fails to stream the data.
           </dd>
 
         <dt class="no-docs">
@@ -706,7 +582,7 @@ Style guide to contributors:
         </p>
         <ol>
           <li>
-            Let <var>promise</var> be a new <code>Promise</code> object and
+            Let <var>promise</var> be a new <code><a>Promise</a></code> object and
             <var>resolver</var> be its associated <code>resolver</code>.
           </li>
           <li>
@@ -743,7 +619,7 @@ Style guide to contributors:
         </p>
         <ol>
           <li>
-            Let <var>promise</var> be a new <code>Promise</code> object and
+            Let <var>promise</var> be a new <code><a>Promise</a></code> object and
             <var>resolver</var> be its associated <code>resolver</code>.
           </li>
           <li>
@@ -815,10 +691,10 @@ Style guide to contributors:
         <dt>Promise getChannels ()</dt>
           <dd>
             This method makes a request to retrieve all the TV channels that are
-            available in the TV source. It returns a new <code>Promise</code>
+            available in the TV source. It returns a new <code><a>Promise</a></code>
             that will be used to notify the caller about the result of the
             operation, which is an array of <a>TVChannel</a> elements that
-            belong to the TV source. Note that the <code>Promise</code> may be
+            belong to the TV source. Note that the <code><a>Promise</a></code> may be
             rejected with an <code>InvalidStateError</code> if this method gets
             called during channel scanning.
           </dd>
@@ -827,8 +703,8 @@ Style guide to contributors:
           <dd>
             This method makes a request to tune the currently streamed TV
             channel by the <code>channelNumber</code> parameter. It returns a
-            new <code>Promise</code> that will be used to notify the caller
-            about the result of the operation. Note that the <code>Promise</code>
+            new <code><a>Promise</a></code> that will be used to notify the caller
+            about the result of the operation. Note that the <code><a>Promise</a></code>
             may be rejected with an <code>InvalidStateError</code> if this
             method gets called during channel scanning.
             <dl class='parameters'>
@@ -844,7 +720,7 @@ Style guide to contributors:
           <dd>
             This method makes a request to start scanning all the TV channels
             that are available in the TV source by the <code>options</code>
-            parameter. It returns a new <code>Promise</code> that will be used
+            parameter. It returns a new <code><a>Promise</a></code> that will be used
             to notify the caller about the result of the operation. Note that
             this method has to be called first so that the method
             <a><code>getChannels</code></a> can retrieve the channels that have
@@ -865,7 +741,7 @@ Style guide to contributors:
         <dt>Promise stopScanning ()</dt>
           <dd>
             This method makes a request to stop scanning the TV channels for the
-            TV source. It returns a new <code>Promise</code> that will be used
+            TV source. It returns a new <code><a>Promise</a></code> that will be used
             to notify the caller about the result of the operation.
           </dd>
 
@@ -933,7 +809,7 @@ Style guide to contributors:
         </p>
         <ol>
           <li>
-            Let <var>promise</var> be a new <code>Promise</code> object and
+            Let <var>promise</var> be a new <code><a>Promise</a></code> object and
             <var>resolver</var> be its associated <code>resolver</code>.
           </li>
           <li>
@@ -970,7 +846,7 @@ Style guide to contributors:
         </p>
         <ol>
           <li>
-            Let <var>promise</var> be a new <code>Promise</code> object and
+            Let <var>promise</var> be a new <code><a>Promise</a></code> object and
             <var>resolver</var> be its associated <code>resolver</code>.
           </li>
           <li>
@@ -1003,7 +879,7 @@ Style guide to contributors:
         </p>
         <ol>
           <li>
-            Let <var>promise</var> be a new <code>Promise</code> object and
+            Let <var>promise</var> be a new <code><a>Promise</a></code> object and
             <var>resolver</var> be its associated <code>resolver</code>.
           </li>
           <li>
@@ -1044,7 +920,7 @@ Style guide to contributors:
         </p>
         <ol>
           <li>
-            Let <var>promise</var> be a new <code>Promise</code> object and
+            Let <var>promise</var> be a new <code><a>Promise</a></code> object and
             <var>resolver</var> be its associated <code>resolver</code>.
           </li>
           <li>
@@ -1139,7 +1015,7 @@ Style guide to contributors:
           <dd>
             This method makes a request to retrieve all the TV programs that are
             available in the TV channel by the <code>options</code> parameter.
-            It returns a new <code>Promise</code> that will be used to notify
+            It returns a new <code><a>Promise</a></code> that will be used to notify
             the caller about the result of the operation, which is an array of
             <a>TVProgram</a> elements that belong to the TV channel.
             <dl class='parameters'>
@@ -1155,7 +1031,7 @@ Style guide to contributors:
         <dt>Promise getCurrentProgram ()</dt>
           <dd>
             This method makes a request to retrieve the current TV program
-            available in the TV channel. It returns a new <code>Promise</code>
+            available in the TV channel. It returns a new <code><a>Promise</a></code>
             that will be used to notify the caller about the result of the
             operation, which is a <a>TVProgram</a> element that belongs to the
             TV channel.
@@ -1229,7 +1105,7 @@ Style guide to contributors:
         </p>
         <ol>
           <li>
-            Let <var>promise</var> be a new <code>Promise</code> object and
+            Let <var>promise</var> be a new <code><a>Promise</a></code> object and
             <var>resolver</var> be its associated <code>resolver</code>.
           </li>
           <li>
@@ -1267,7 +1143,7 @@ Style guide to contributors:
         </p>
         <ol>
           <li>
-            Let <var>promise</var> be a new <code>Promise</code> object and
+            Let <var>promise</var> be a new <code><a>Promise</a></code> object and
             <var>resolver</var> be its associated <code>resolver</code>.
           </li>
           <li>
