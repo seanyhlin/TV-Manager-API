@@ -1021,7 +1021,7 @@ Style guide to contributors:
               <dt>optional TVGetProgramsOptions options</dt>
                 <dd>
                   Specifies the options for retrieving the TV programs. If this
-                  parameter is not passed, this method will retuen all the
+                  parameter is not passed, this method will return all the
                   available TV programs.
                 </dd>
             </dl>
@@ -1258,23 +1258,6 @@ Style guide to contributors:
         retrieving the TV programs.
       </p>
       <dl title="dictionary TVGetProgramsOptions" class="idl">
-        <dt>unsigned long offsetOfPrograms</dt>
-          <dd>
-            Specifies how many TV programs to be skipped from the time point
-            of now. E.g., if this option is passed as <code>1</code>, the
-            method will skip the current TV program and return the ones starting
-            with the next TV program.
-          </dd>
-        <dt>unsigned long numberOfPrograms</dt>
-          <dd>
-            Specifies how many TV programs to be retrieved from the time point
-            of now. E.g., if this option is passed as <code>1</code>, the
-            method will return the TV program that is currently broadcasted by
-            the TV channel at this moment; if it is passed as <code>2</code>,
-            the method will return the current and the next TV programs. Passing
-            0 implies no effect. Besides, the number of returned TV programs
-            could be less than this value if there are not that many programs.
-          </dd>
         <dt>unsigned long long startTime</dt>
           <dd>
             Specifies the start time of a time period which bounds the time
