@@ -1214,12 +1214,12 @@ Style guide to contributors:
 
         <dt>readonly attribute unsigned long long startTime</dt>
           <dd>
-            MUST return the start time of the TV program.
+            MUST return the start time (in milliseconds) of the TV program.
           </dd>
 
         <dt>readonly attribute unsigned long long duration</dt>
           <dd>
-            MUST return the duration of the TV program.
+            MUST return the duration (in milliseconds) of the TV program.
           </dd>
 
         <dt>readonly attribute DOMString? description</dt>
@@ -1317,7 +1317,8 @@ Style guide to contributors:
         <dt>readonly attribute object programs</dt>
           <dd>
             MUST return the available TV programs in the EIT that is broadcasted
-            by the TV source. Please note that the cached value for this array
+            by the TV source. Please note that it needs to be casted into a list
+            of <code>TVProgram</code> instances. The cached value for this array
             needs to go into an internal slot for the object, and it should be
             cached there until the next time that the underlying array changes
             when the cached value will be updated.
